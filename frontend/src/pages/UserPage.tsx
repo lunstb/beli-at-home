@@ -10,7 +10,7 @@ import { getUserDishes } from '../api/dishes';
 import { formatScore } from '../utils/formatters';
 import { useAuth } from '../hooks/useAuth';
 import { useToast } from '../components/shared/Toast';
-import type { User, Dish, Friend } from '../types';
+import type { User, Dish } from '../types';
 import { UtensilsCrossed } from 'lucide-react';
 
 type FriendStatus = 'none' | 'pending' | 'friends';

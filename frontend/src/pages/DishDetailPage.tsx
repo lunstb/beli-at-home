@@ -28,7 +28,7 @@ import { addBookmark, removeBookmark } from '../api/bookmarks';
 import { useAuth } from '../hooks/useAuth';
 import { useToast } from '../components/shared/Toast';
 import { formatDate } from '../utils/formatters';
-import type { Dish, DishPhoto } from '../types';
+import type { Dish } from '../types';
 
 export function DishDetailPage() {
   const { id } = useParams<{ id: string }>();
