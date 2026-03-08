@@ -1,0 +1,32 @@
+node_modules/
+backend/data/
+backend/uploads/
+backend/dist/
+backend/.env
+frontend/.env
+frontend/dist/
+*.db
+*.db-wal
+*.db-shm
+.DS_Store
+
+# Devenv
+.devenv*
+devenv.local.nix
+devenv.local.yaml
+
+# direnv
+.direnv
+
+# pre-commit
+.pre-commit-config.yaml
+
+# Claude Code
+.claude/
+
+# Terraform
+infra/.terraform/
+infra/.terraform.lock.hcl
+infra/*.tfstate
+infra/*.tfstate.*
+infra/*.tfvars

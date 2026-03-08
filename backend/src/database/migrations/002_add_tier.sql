@@ -1,0 +1,3 @@
+-- Add tier column for quality tiers (bad/ok/great) that clamp rating ranges
+-- This is handled programmatically in connection.ts since SQLite doesn't support
+-- ALTER TABLE ADD COLUMN IF NOT EXISTS
