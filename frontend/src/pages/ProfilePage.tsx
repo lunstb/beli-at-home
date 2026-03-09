@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Search, ChefHat } from 'lucide-react';
+import { Search, ChefHat, Settings } from 'lucide-react';
 import { PageContainer } from '../components/layout/PageContainer';
 import { DishCard } from '../components/dish/DishCard';
 import { EmptyState } from '../components/shared/EmptyState';
@@ -86,6 +86,12 @@ export function ProfilePage() {
               <p className="text-sm text-stone-500 line-clamp-2">{user.bio}</p>
             )}
           </div>
+          <button
+            onClick={() => navigate('/settings')}
+            className="p-2 text-stone-400 hover:text-stone-600 transition-colors"
+          >
+            <Settings size={20} />
+          </button>
         </div>
 
         {/* Stats */}

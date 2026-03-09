@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Plus, Eye, EyeOff, ThumbsDown, Meh, ThumbsUp, Camera, X } from 'lucide-react';
 import { useToast } from '../shared/Toast';
+import { ImageCropper } from '../shared/ImageCropper';
 import { TagInput } from './TagInput';
 import { RecipeInfoEntry, type RecipeInfoFormData } from './RecipeInfoEntry';
 
@@ -51,6 +52,7 @@ const tierOptions: { value: Tier; label: string; icon: typeof ThumbsDown; desc: 
 export function DishForm({ initialData, onSubmit, submitLabel, onDirty }: DishFormProps) {
   const [form, setForm] = useState<DishFormData>(initialData || getDefaultFormData());
   const [submitting, setSubmitting] = useState(false);
+  const [cropQueue, setCropQueue] = useState<string[]>([]);
   const photoInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const mountedRef = useRef(false);
@@ -68,19 +70,31 @@ export function DishForm({ initialData, onSubmit, submitLabel, onDirty }: DishFo
     const files = e.target.files;
     if (!files) return;
 
-    const newPhotos: PhotoEntry[] = [];
+    const urls: string[] = [];
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
       if (file.size > MAX_FILE_SIZE) {
         toast(`"${file.name}" exceeds 10MB limit`, 'error');
         continue;
       }
-      newPhotos.push({ file, url: URL.createObjectURL(file), caption: '' });
+      urls.push(URL.createObjectURL(file));
     }
 
-    setForm((f) => ({ ...f, photos: [...f.photos, ...newPhotos] }));
-    // Reset so the same file(s) can be selected again
+    if (urls.length > 0) {
+      setCropQueue(urls);
+    }
     e.target.value = '';
+  };
+
+  const handleCropDone = (blob: Blob) => {
+    const url = URL.createObjectURL(blob);
+    const file = new File([blob], `photo-${Date.now()}.jpg`, { type: 'image/jpeg' });
+    setForm((f) => ({ ...f, photos: [...f.photos, { file, url, caption: '' }] }));
+    setCropQueue((q) => q.slice(1));
+  };
+
+  const handleCropCancel = () => {
+    setCropQueue((q) => q.slice(1));
   };
 
   const removePhoto = (index: number) => {
@@ -312,6 +326,14 @@ export function DishForm({ initialData, onSubmit, submitLabel, onDirty }: DishFo
       >
         {submitting ? 'Saving...' : submitLabel}
       </button>
+
+      {cropQueue.length > 0 && (
+        <ImageCropper
+          imageSrc={cropQueue[0]}
+          onCropDone={handleCropDone}
+          onCancel={handleCropCancel}
+        />
+      )}
     </form>
   );
 }

@@ -217,6 +217,7 @@ export function deleteDish(dishId: number, userId: number): boolean {
   const dish = db.prepare('SELECT * FROM dishes WHERE id = ? AND user_id = ?').get(dishId, userId) as Dish | undefined;
   if (!dish) return false;
 
+  db.prepare('DELETE FROM ranking_results WHERE winner_dish_id = ? OR loser_dish_id = ?').run(dishId, dishId);
   db.prepare('DELETE FROM dishes WHERE id = ? AND user_id = ?').run(dishId, userId);
 
   // Recalculate ratings after deletion
