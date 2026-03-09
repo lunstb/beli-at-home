@@ -4,6 +4,8 @@ import { useToast } from '../shared/Toast';
 import { ImageCropper } from '../shared/ImageCropper';
 import { TagInput } from './TagInput';
 import { RecipeInfoEntry, type RecipeInfoFormData } from './RecipeInfoEntry';
+import { getFriends } from '../../api/friends';
+import type { Friend } from '../../types';
 
 export type Tier = 'bad' | 'ok' | 'great';
 
@@ -22,6 +24,7 @@ export interface DishFormData {
   tier: Tier | null;
   photos: PhotoEntry[];
   recipeEntries: RecipeInfoFormData[];
+  taggedUserIds: number[];
 }
 
 interface DishFormProps {
@@ -40,6 +43,7 @@ function getDefaultFormData(): DishFormData {
     tier: null,
     photos: [],
     recipeEntries: [],
+    taggedUserIds: [],
   };
 }
 
@@ -53,6 +57,7 @@ export function DishForm({ initialData, onSubmit, submitLabel, onDirty }: DishFo
   const [form, setForm] = useState<DishFormData>(initialData || getDefaultFormData());
   const [submitting, setSubmitting] = useState(false);
   const [cropQueue, setCropQueue] = useState<{ url: string; file: File }[]>([]);
+  const [friendsList, setFriendsList] = useState<Friend[]>([]);
   const photoInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const mountedRef = useRef(false);
@@ -63,6 +68,10 @@ export function DishForm({ initialData, onSubmit, submitLabel, onDirty }: DishFo
     }
     mountedRef.current = true;
   }, [form]);
+
+  useEffect(() => {
+    getFriends().then(setFriendsList).catch(() => {});
+  }, []);
 
   const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
@@ -266,6 +275,48 @@ export function DishForm({ initialData, onSubmit, submitLabel, onDirty }: DishFo
         />
       </div>
 
+      {/* Tag Friends */}
+      <div>
+        <label className="block text-sm font-medium text-stone-700 mb-1.5">Ate with</label>
+        {/* Selected tags */}
+        {form.taggedUserIds.length > 0 && (
+          <div className="flex flex-wrap gap-2 mb-2">
+            {form.taggedUserIds.map((uid) => {
+              const friend = friendsList.find(f => f.id === uid);
+              if (!friend) return null;
+              return (
+                <span key={uid} className="inline-flex items-center gap-1 px-2.5 py-1 bg-orange-50 text-[var(--color-primary)] rounded-full text-xs font-medium">
+                  {friend.username}
+                  <button type="button" onClick={() => setForm(f => ({ ...f, taggedUserIds: f.taggedUserIds.filter(id => id !== uid) }))}>
+                    <X size={12} />
+                  </button>
+                </span>
+              );
+            })}
+          </div>
+        )}
+        {/* Friend suggestions */}
+        <div className="flex flex-wrap gap-2">
+          {friendsList
+            .filter(f => !form.taggedUserIds.includes(f.id))
+            .slice(0, 5)
+            .map(f => (
+              <button
+                key={f.id}
+                type="button"
+                onClick={() => setForm(prev => ({ ...prev, taggedUserIds: [...prev.taggedUserIds, f.id] }))}
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 border border-stone-200 rounded-full text-xs text-stone-600 hover:border-[var(--color-primary)] hover:text-[var(--color-primary)] transition-colors"
+              >
+                <div className="w-4 h-4 rounded-full bg-stone-200 overflow-hidden">
+                  {f.avatar_url ? <img src={f.avatar_url} alt="" className="w-full h-full object-cover" /> : null}
+                </div>
+                {f.username}
+              </button>
+            ))
+          }
+        </div>
+      </div>
+
       <div>
         <div className="flex items-center justify-between mb-3">
           <label className="text-sm font-medium text-stone-700">Recipe Info</label>
@@ -310,19 +361,15 @@ export function DishForm({ initialData, onSubmit, submitLabel, onDirty }: DishFo
           )}
           <span className="text-sm text-stone-700">Visible to friends</span>
         </div>
-        <button
-          type="button"
-          onClick={() => setForm((f) => ({ ...f, isPublic: !f.isPublic }))}
-          className={`w-11 h-6 rounded-full transition-colors relative ${
-            form.isPublic ? 'bg-[var(--color-primary)]' : 'bg-stone-300'
-          }`}
-        >
-          <span
-            className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${
-              form.isPublic ? 'translate-x-5' : 'translate-x-0.5'
-            }`}
+        <label className="relative inline-flex items-center cursor-pointer">
+          <input
+            type="checkbox"
+            checked={form.isPublic}
+            onChange={() => setForm((f) => ({ ...f, isPublic: !f.isPublic }))}
+            className="sr-only peer"
           />
-        </button>
+          <div className="w-11 h-6 bg-stone-300 rounded-full peer peer-checked:bg-[var(--color-primary)] transition-colors after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:shadow after:transition-all peer-checked:after:translate-x-5" />
+        </label>
       </div>
 
       <button

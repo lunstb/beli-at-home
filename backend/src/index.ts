@@ -14,6 +14,7 @@ import friendRoutes from './routes/friends.js';
 import feedRoutes from './routes/feed.js';
 import bookmarkRoutes from './routes/bookmarks.js';
 import friendDishRoutes from './routes/friendDishes.js';
+import notificationRoutes from './routes/notifications.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -43,6 +44,7 @@ app.use('/api/friends', friendRoutes);
 app.use('/api/feed', feedRoutes);
 app.use('/api/bookmarks', bookmarkRoutes);
 app.use('/api/users', friendDishRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 // Health check
 app.get('/api/health', (_req, res) => {

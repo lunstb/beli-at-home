@@ -41,6 +41,9 @@ export function EditDishPage() {
       formData.append('tags', JSON.stringify(data.tags));
       formData.append('isPublic', String(data.isPublic));
       if (data.tier) formData.append('tier', data.tier);
+      if (data.taggedUserIds.length > 0) {
+        formData.append('taggedUsers', JSON.stringify(data.taggedUserIds));
+      }
 
       await updateDish(dish.id, formData);
 
@@ -130,6 +133,7 @@ export function EditDishPage() {
         type: ri.type,
         content: ri.content,
       })) || [],
+    taggedUserIds: dish.tagged_users?.map(u => u.id) || [],
   };
 
   return (

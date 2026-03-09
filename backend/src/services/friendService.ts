@@ -1,4 +1,5 @@
 import { getDb } from '../database/connection.js';
+import { createNotification } from './notificationService.js';
 import type { Friendship, User } from '../types/index.js';
 
 export function sendRequest(requesterId: number, addresseeId: number): Friendship {
@@ -32,6 +33,8 @@ export function sendRequest(requesterId: number, addresseeId: number): Friendshi
     'INSERT INTO friendships (requester_id, addressee_id, status) VALUES (?, ?, ?)'
   ).run(requesterId, addresseeId, 'pending');
 
+  createNotification(addresseeId, 'friend_request', requesterId);
+
   return db.prepare('SELECT * FROM friendships WHERE id = ?').get(result.lastInsertRowid) as Friendship;
 }
 
@@ -49,6 +52,8 @@ export function acceptRequest(friendshipId: number, userId: number): Friendship 
   db.prepare(
     'UPDATE friendships SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?'
   ).run('accepted', friendshipId);
+
+  createNotification(friendship.requester_id, 'friend_accepted', userId);
 
   return db.prepare('SELECT * FROM friendships WHERE id = ?').get(friendshipId) as Friendship;
 }

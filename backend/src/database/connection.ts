@@ -62,6 +62,34 @@ export function initDb(): Database.Database {
     );
   `);
 
+  // Create notifications table
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS notifications (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER NOT NULL,
+      type TEXT NOT NULL CHECK(type IN ('friend_request', 'friend_accepted', 'tagged_in_dish', 'friend_new_dish')),
+      from_user_id INTEGER NOT NULL,
+      dish_id INTEGER,
+      read INTEGER DEFAULT 0,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (user_id) REFERENCES users(id),
+      FOREIGN KEY (from_user_id) REFERENCES users(id),
+      FOREIGN KEY (dish_id) REFERENCES dishes(id) ON DELETE CASCADE
+    );
+  `);
+
+  // Create dish_tagged_users table
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS dish_tagged_users (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      dish_id INTEGER NOT NULL,
+      user_id INTEGER NOT NULL,
+      UNIQUE(dish_id, user_id),
+      FOREIGN KEY (dish_id) REFERENCES dishes(id) ON DELETE CASCADE,
+      FOREIGN KEY (user_id) REFERENCES users(id)
+    );
+  `);
+
   console.log('Database initialized successfully');
   return db;
 }

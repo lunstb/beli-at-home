@@ -16,6 +16,7 @@ import { UserPage } from './pages/UserPage';
 import { FriendsPage } from './pages/FriendsPage';
 import { BookmarksPage } from './pages/BookmarksPage';
 import { SettingsPage } from './pages/SettingsPage';
+import { NotificationsPage } from './pages/NotificationsPage';
 import type { ReactNode } from 'react';
 
 function ProtectedRoute({ children }: { children: ReactNode }) {
@@ -142,6 +143,16 @@ function AppRoutes() {
           <ProtectedRoute>
             <AppLayout>
               <FriendsPage />
+            </AppLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/notifications"
+        element={
+          <ProtectedRoute>
+            <AppLayout>
+              <NotificationsPage />
             </AppLayout>
           </ProtectedRoute>
         }

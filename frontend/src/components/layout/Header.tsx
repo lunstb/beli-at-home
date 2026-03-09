@@ -1,15 +1,15 @@
 import { useNavigate } from 'react-router-dom';
 import { Bell, Settings } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { getFriendRequests } from '../../api/friends';
+import { getUnreadCount } from '../../api/notifications';
 
 export function Header() {
   const navigate = useNavigate();
   const [requestCount, setRequestCount] = useState(0);
 
   useEffect(() => {
-    getFriendRequests()
-      .then((requests) => setRequestCount(requests.length))
+    getUnreadCount()
+      .then((count) => setRequestCount(count))
       .catch(() => {});
   }, []);
 
@@ -24,7 +24,7 @@ export function Header() {
         </h1>
         <div className="flex items-center gap-2">
           <button
-            onClick={() => navigate('/friends')}
+            onClick={() => navigate('/notifications')}
             className="relative p-2 rounded-full hover:bg-stone-100 transition-colors"
           >
             <Bell size={20} className="text-stone-600" />

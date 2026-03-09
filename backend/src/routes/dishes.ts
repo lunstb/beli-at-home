@@ -16,7 +16,10 @@ import {
   addDishPhoto,
   deleteDishPhoto,
   updateDishPhotoCaption,
+  setDishTaggedUsers,
+  getDishTaggedUsers,
 } from '../services/dishService.js';
+import { createNotification } from '../services/notificationService.js';
 
 const router = Router();
 
@@ -24,7 +27,7 @@ router.post('/', authMiddleware, uploadDishPhoto.single('photo'), async (req: Re
   const authReq = req as AuthRequest;
 
   try {
-    const { name, caption, tags, recipeInfo, isPublic, tier } = req.body;
+    const { name, caption, tags, recipeInfo, isPublic, tier, taggedUsers } = req.body;
 
     if (!name || name.trim().length === 0) {
       res.status(400).json({ error: 'Meal name is required' });
@@ -49,6 +52,15 @@ router.post('/', authMiddleware, uploadDishPhoto.single('photo'), async (req: Re
       }
     }
 
+    let parsedTaggedUsers: number[] = [];
+    if (taggedUsers) {
+      try {
+        parsedTaggedUsers = typeof taggedUsers === 'string' ? JSON.parse(taggedUsers) : taggedUsers;
+      } catch {
+        parsedTaggedUsers = [];
+      }
+    }
+
     let photoPath: string | undefined;
     if (req.file) {
       const ext = path.extname(req.file.originalname) || '.jpg';
@@ -65,6 +77,13 @@ router.post('/', authMiddleware, uploadDishPhoto.single('photo'), async (req: Re
       isPublic: isPublic !== undefined ? isPublic === 'true' || isPublic === true : true,
       tier: tier && validTiers.includes(tier) ? tier : undefined,
     }, photoPath);
+
+    if (parsedTaggedUsers.length > 0) {
+      setDishTaggedUsers(dish.id, authReq.user!.id, parsedTaggedUsers);
+      for (const taggedUserId of parsedTaggedUsers) {
+        createNotification(taggedUserId, 'tagged_in_dish', authReq.user!.id, dish.id);
+      }
+    }
 
     res.status(201).json({ dish });
   } catch (err: any) {
@@ -104,6 +123,8 @@ router.get('/:id', authMiddleware, (req: Request, res: Response) => {
     return;
   }
 
+  (dish as any).tagged_users = getDishTaggedUsers(dishId);
+
   res.json({ dish });
 });
 
@@ -117,7 +138,7 @@ router.put('/:id', authMiddleware, uploadDishPhoto.single('photo'), async (req: 
   }
 
   try {
-    const { name, caption, tags, isPublic, tier } = req.body;
+    const { name, caption, tags, isPublic, tier, taggedUsers } = req.body;
 
     let parsedTags: string[] | undefined;
     if (tags) {
@@ -125,6 +146,15 @@ router.put('/:id', authMiddleware, uploadDishPhoto.single('photo'), async (req: 
         parsedTags = typeof tags === 'string' ? JSON.parse(tags) : tags;
       } catch {
         parsedTags = [];
+      }
+    }
+
+    let parsedTaggedUsers: number[] | undefined;
+    if (taggedUsers) {
+      try {
+        parsedTaggedUsers = typeof taggedUsers === 'string' ? JSON.parse(taggedUsers) : taggedUsers;
+      } catch {
+        parsedTaggedUsers = [];
       }
     }
 
@@ -136,6 +166,10 @@ router.put('/:id', authMiddleware, uploadDishPhoto.single('photo'), async (req: 
     }
 
     const validTiers = ['bad', 'ok', 'great'];
+
+    // Get existing tagged users before update for diffing
+    const existingTaggedUsers = parsedTaggedUsers ? getDishTaggedUsers(dishId).map(u => u.id) : [];
+
     const dish = updateDish(dishId, authReq.user!.id, {
       name,
       caption,
@@ -147,6 +181,15 @@ router.put('/:id', authMiddleware, uploadDishPhoto.single('photo'), async (req: 
     if (!dish) {
       res.status(404).json({ error: 'Dish not found or not authorized' });
       return;
+    }
+
+    if (parsedTaggedUsers) {
+      setDishTaggedUsers(dishId, authReq.user!.id, parsedTaggedUsers);
+      // Notify only newly tagged users
+      const newlyTagged = parsedTaggedUsers.filter(id => !existingTaggedUsers.includes(id));
+      for (const taggedUserId of newlyTagged) {
+        createNotification(taggedUserId, 'tagged_in_dish', authReq.user!.id, dishId);
+      }
     }
 
     res.json({ dish });

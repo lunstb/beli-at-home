@@ -26,6 +26,7 @@ export interface Dish {
   tags?: DishTag[];
   recipe_info?: RecipeInfo[];
   photos?: DishPhoto[];
+  tagged_users?: TaggedUser[];
   // Joined fields from feed/discover queries
   username?: string;
   avatar_url?: string;
@@ -144,4 +145,24 @@ export interface SearchUser {
   username: string;
   avatar_url: string | null;
   bio: string | null;
+}
+
+export interface Notification {
+  id: number;
+  user_id: number;
+  type: 'friend_request' | 'friend_accepted' | 'tagged_in_dish' | 'friend_new_dish';
+  from_user_id: number;
+  dish_id: number | null;
+  read: number;
+  created_at: string;
+  from_username: string;
+  from_avatar_url: string | null;
+  dish_name: string | null;
+  dish_photo: string | null;
+}
+
+export interface TaggedUser {
+  id: number;
+  username: string;
+  avatar_url: string | null;
 }

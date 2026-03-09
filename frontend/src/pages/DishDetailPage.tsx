@@ -18,6 +18,7 @@ import {
   BookOpen,
   ChevronLeft,
   ChevronRight,
+  Tag,
 } from 'lucide-react';
 import { PageContainer } from '../components/layout/PageContainer';
 import { BottomSheet } from '../components/shared/BottomSheet';
@@ -234,6 +235,25 @@ export function DishDetailPage() {
             <Calendar size={12} />
             <span>Added {formatDate(dish.created_at)}</span>
           </div>
+          {dish.tagged_users && dish.tagged_users.length > 0 && (
+            <div className="flex items-center gap-2 mt-2">
+              <Tag size={14} className="text-stone-400" />
+              <div className="flex items-center gap-1 text-xs text-stone-500">
+                with{' '}
+                {dish.tagged_users.map((u, i) => (
+                  <span key={u.id}>
+                    <button
+                      onClick={() => navigate(`/users/${u.id}`)}
+                      className="text-[var(--color-primary)] font-medium hover:underline"
+                    >
+                      {u.username}
+                    </button>
+                    {i < dish.tagged_users!.length - 1 && ', '}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Tags */}

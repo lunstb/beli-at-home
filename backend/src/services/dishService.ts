@@ -2,6 +2,7 @@ import { getDb } from '../database/connection.js';
 import { createFeedEntry } from './feedService.js';
 import { areFriends } from './friendService.js';
 import { recalculateRatings } from './rankingService.js';
+import { createNotification } from './notificationService.js';
 import type { Dish, DishTag, DishPhoto, RecipeInfo } from '../types/index.js';
 
 interface CreateDishData {
@@ -142,13 +143,17 @@ export function getUserDishes(
     `SELECT d.* FROM dishes d ${whereClause} ${orderClause} LIMIT ? OFFSET ?`
   ).all(...params, limit, offset) as Dish[];
 
-  // Attach tags and photos to each dish
+  // Attach tags, photos, and tagged users to each dish
   const getTagsStmt = db.prepare('SELECT * FROM dish_tags WHERE dish_id = ?');
   const getPhotosStmt = db.prepare('SELECT * FROM dish_photos WHERE dish_id = ? ORDER BY sort_order');
+  const getTaggedUsersStmt = db.prepare(
+    `SELECT u.id, u.username, u.avatar_url FROM dish_tagged_users dt JOIN users u ON u.id = dt.user_id WHERE dt.dish_id = ?`
+  );
   for (const dish of dishes) {
     dish.is_public = Boolean(dish.is_public);
     dish.tags = getTagsStmt.all(dish.id) as DishTag[];
     dish.photos = getPhotosStmt.all(dish.id) as DishPhoto[];
+    (dish as any).tagged_users = getTaggedUsersStmt.all(dish.id);
   }
 
   return { dishes, total: total.count };
@@ -339,6 +344,29 @@ export function updateDishPhotoCaption(photoId: number, userId: number, caption:
   if (!photo) return false;
   db.prepare('UPDATE dish_photos SET caption = ? WHERE id = ?').run(caption || null, photoId);
   return true;
+}
+
+export function setDishTaggedUsers(dishId: number, userId: number, taggedUserIds: number[]) {
+  const db = getDb();
+  // Verify dish belongs to user
+  const dish = db.prepare('SELECT id FROM dishes WHERE id = ? AND user_id = ?').get(dishId, userId);
+  if (!dish) return;
+
+  db.prepare('DELETE FROM dish_tagged_users WHERE dish_id = ?').run(dishId);
+  const insertStmt = db.prepare('INSERT OR IGNORE INTO dish_tagged_users (dish_id, user_id) VALUES (?, ?)');
+  for (const taggedId of taggedUserIds) {
+    insertStmt.run(dishId, taggedId);
+  }
+}
+
+export function getDishTaggedUsers(dishId: number): { id: number; username: string; avatar_url: string | null }[] {
+  const db = getDb();
+  return db.prepare(
+    `SELECT u.id, u.username, u.avatar_url
+     FROM dish_tagged_users dt
+     JOIN users u ON u.id = dt.user_id
+     WHERE dt.dish_id = ?`
+  ).all(dishId) as any[];
 }
 
 export function deleteRecipeInfo(recipeInfoId: number, userId: number): boolean {

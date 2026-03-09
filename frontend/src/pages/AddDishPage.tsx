@@ -28,6 +28,9 @@ export function AddDishPage() {
       formData.append('tags', JSON.stringify(data.tags));
       formData.append('isPublic', String(data.isPublic));
       if (data.tier) formData.append('tier', data.tier);
+      if (data.taggedUserIds.length > 0) {
+        formData.append('taggedUsers', JSON.stringify(data.taggedUserIds));
+      }
 
       const dish = await createDish(formData);
 
