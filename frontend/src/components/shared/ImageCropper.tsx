@@ -26,6 +26,30 @@ export function ImageCropper({ imageSrc, onCropDone, onSkip, onCancel }: ImageCr
 
   return (
     <div className="fixed inset-0 z-50 bg-black flex flex-col">
+      {/* Top bar — safe from iOS bottom chrome */}
+      <div className="flex items-center justify-between gap-3 p-4 pt-[max(1rem,env(safe-area-inset-top))] bg-black/90 z-10">
+        <button
+          type="button"
+          onClick={onCancel}
+          className="py-2.5 px-4 rounded-xl border border-white/30 text-white font-medium text-sm"
+        >
+          Cancel
+        </button>
+        <button
+          type="button"
+          onClick={onSkip}
+          className="py-2.5 px-4 rounded-xl border border-white/30 text-white font-medium text-sm"
+        >
+          Use Original
+        </button>
+        <button
+          type="button"
+          onClick={handleDone}
+          className="py-2.5 px-5 rounded-xl bg-[var(--color-primary)] text-white font-semibold text-sm"
+        >
+          Crop
+        </button>
+      </div>
       <div className="relative flex-1">
         <Cropper
           image={imageSrc}
@@ -36,29 +60,6 @@ export function ImageCropper({ imageSrc, onCropDone, onSkip, onCancel }: ImageCr
           onZoomChange={setZoom}
           onCropComplete={onCropComplete}
         />
-      </div>
-      <div className="flex gap-3 p-4 pb-8 bg-black/90">
-        <button
-          type="button"
-          onClick={onCancel}
-          className="py-3 px-4 rounded-xl border border-white/30 text-white font-medium text-sm"
-        >
-          Cancel
-        </button>
-        <button
-          type="button"
-          onClick={onSkip}
-          className="flex-1 py-3 rounded-xl border border-white/30 text-white font-medium text-sm"
-        >
-          Use Original
-        </button>
-        <button
-          type="button"
-          onClick={handleDone}
-          className="flex-1 py-3 rounded-xl bg-[var(--color-primary)] text-white font-semibold text-sm"
-        >
-          Crop
-        </button>
       </div>
     </div>
   );
