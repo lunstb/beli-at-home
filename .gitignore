@@ -8,6 +8,7 @@ frontend/dist/
 *.db
 *.db-wal
 *.db-shm
+test-results/
 .DS_Store
 
 # Devenv

@@ -14,7 +14,9 @@ export const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret-change-me-in-pro
 export const PORT = parseInt(process.env.PORT || '3001', 10);
 export const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
 export const UPLOAD_DIR = path.join(ROOT_DIR, 'uploads');
-export const DB_PATH = path.join(ROOT_DIR, 'data', 'beli.db');
+export const DB_PATH = process.env.NODE_ENV === 'test'
+  ? path.join(ROOT_DIR, 'data', 'beli-test.db')
+  : path.join(ROOT_DIR, 'data', 'beli.db');
 
 // Storage mode: "local" or "s3"
 export const STORAGE_MODE = process.env.STORAGE_MODE || 'local';
