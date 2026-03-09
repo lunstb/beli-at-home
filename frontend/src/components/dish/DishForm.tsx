@@ -44,7 +44,7 @@ function getDefaultFormData(): DishFormData {
 
 const tierOptions: { value: Tier; label: string; icon: typeof ThumbsDown; desc: string; color: string; activeColor: string }[] = [
   { value: 'bad', label: 'Bad', icon: ThumbsDown, desc: '0 – 3.9', color: 'text-red-400', activeColor: 'bg-red-50 border-red-300 text-red-600' },
-  { value: 'ok', label: 'OK', icon: Meh, desc: '4.0 – 6.9', color: 'text-yellow-500', activeColor: 'bg-yellow-50 border-yellow-300 text-yellow-600' },
+  { value: 'ok', label: 'Decent', icon: Meh, desc: '4.0 – 6.9', color: 'text-yellow-500', activeColor: 'bg-yellow-50 border-yellow-300 text-yellow-600' },
   { value: 'great', label: 'Great', icon: ThumbsUp, desc: '7.0 – 10', color: 'text-green-500', activeColor: 'bg-green-50 border-green-300 text-green-600' },
 ];
 
@@ -293,13 +293,13 @@ export function DishForm({ initialData, onSubmit, submitLabel, onDirty }: DishFo
         <button
           type="button"
           onClick={() => setForm((f) => ({ ...f, isPublic: !f.isPublic }))}
-          className={`w-12 h-7 rounded-full transition-colors relative ${
+          className={`w-11 h-6 rounded-full transition-colors relative ${
             form.isPublic ? 'bg-[var(--color-primary)]' : 'bg-stone-300'
           }`}
         >
           <span
-            className={`absolute top-1 w-5 h-5 bg-white rounded-full shadow transition-transform ${
-              form.isPublic ? 'translate-x-6' : 'translate-x-1'
+            className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${
+              form.isPublic ? 'translate-x-5' : 'translate-x-0.5'
             }`}
           />
         </button>

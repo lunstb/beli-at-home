@@ -223,7 +223,7 @@ export function DishDetailPage() {
                 {dish.tier === 'great' ? <ThumbsUp size={12} /> :
                  dish.tier === 'ok' ? <Meh size={12} /> :
                  <ThumbsDown size={12} />}
-                {dish.tier.charAt(0).toUpperCase() + dish.tier.slice(1)}
+                {dish.tier === 'ok' ? 'Decent' : dish.tier.charAt(0).toUpperCase() + dish.tier.slice(1)}
               </span>
             )}
           </div>

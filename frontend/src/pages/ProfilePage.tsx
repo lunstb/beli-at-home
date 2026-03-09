@@ -140,7 +140,7 @@ export function ProfilePage() {
               {tierCounts.ok > 0 && (
                 <span className="flex items-center gap-1">
                   <span className="w-2 h-2 rounded-full bg-yellow-400" />
-                  OK {tierCounts.ok}
+                  Decent {tierCounts.ok}
                 </span>
               )}
               {tierCounts.bad > 0 && (
