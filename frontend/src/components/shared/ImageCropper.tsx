@@ -5,11 +5,11 @@ import type { Area } from 'react-easy-crop';
 interface ImageCropperProps {
   imageSrc: string;
   onCropDone: (croppedBlob: Blob) => void;
+  onSkip: () => void;
   onCancel: () => void;
-  aspect?: number;
 }
 
-export function ImageCropper({ imageSrc, onCropDone, onCancel, aspect = 4 / 3 }: ImageCropperProps) {
+export function ImageCropper({ imageSrc, onCropDone, onSkip, onCancel }: ImageCropperProps) {
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
@@ -31,19 +31,26 @@ export function ImageCropper({ imageSrc, onCropDone, onCancel, aspect = 4 / 3 }:
           image={imageSrc}
           crop={crop}
           zoom={zoom}
-          aspect={aspect}
+          aspect={undefined}
           onCropChange={setCrop}
           onZoomChange={setZoom}
           onCropComplete={onCropComplete}
         />
       </div>
-      <div className="flex gap-3 p-4 bg-black/90">
+      <div className="flex gap-3 p-4 pb-8 bg-black/90">
         <button
           type="button"
           onClick={onCancel}
-          className="flex-1 py-3 rounded-xl border border-white/30 text-white font-medium text-sm"
+          className="py-3 px-4 rounded-xl border border-white/30 text-white font-medium text-sm"
         >
           Cancel
+        </button>
+        <button
+          type="button"
+          onClick={onSkip}
+          className="flex-1 py-3 rounded-xl border border-white/30 text-white font-medium text-sm"
+        >
+          Use Original
         </button>
         <button
           type="button"

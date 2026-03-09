@@ -52,7 +52,7 @@ const tierOptions: { value: Tier; label: string; icon: typeof ThumbsDown; desc: 
 export function DishForm({ initialData, onSubmit, submitLabel, onDirty }: DishFormProps) {
   const [form, setForm] = useState<DishFormData>(initialData || getDefaultFormData());
   const [submitting, setSubmitting] = useState(false);
-  const [cropQueue, setCropQueue] = useState<string[]>([]);
+  const [cropQueue, setCropQueue] = useState<{ url: string; file: File }[]>([]);
   const photoInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const mountedRef = useRef(false);
@@ -70,18 +70,18 @@ export function DishForm({ initialData, onSubmit, submitLabel, onDirty }: DishFo
     const files = e.target.files;
     if (!files) return;
 
-    const urls: string[] = [];
+    const entries: { url: string; file: File }[] = [];
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
       if (file.size > MAX_FILE_SIZE) {
         toast(`"${file.name}" exceeds 10MB limit`, 'error');
         continue;
       }
-      urls.push(URL.createObjectURL(file));
+      entries.push({ url: URL.createObjectURL(file), file });
     }
 
-    if (urls.length > 0) {
-      setCropQueue(urls);
+    if (entries.length > 0) {
+      setCropQueue(entries);
     }
     e.target.value = '';
   };
@@ -90,6 +90,12 @@ export function DishForm({ initialData, onSubmit, submitLabel, onDirty }: DishFo
     const url = URL.createObjectURL(blob);
     const file = new File([blob], `photo-${Date.now()}.jpg`, { type: 'image/jpeg' });
     setForm((f) => ({ ...f, photos: [...f.photos, { file, url, caption: '' }] }));
+    setCropQueue((q) => q.slice(1));
+  };
+
+  const handleCropSkip = () => {
+    const current = cropQueue[0];
+    setForm((f) => ({ ...f, photos: [...f.photos, { file: current.file, url: current.url, caption: '' }] }));
     setCropQueue((q) => q.slice(1));
   };
 
@@ -329,8 +335,9 @@ export function DishForm({ initialData, onSubmit, submitLabel, onDirty }: DishFo
 
       {cropQueue.length > 0 && (
         <ImageCropper
-          imageSrc={cropQueue[0]}
+          imageSrc={cropQueue[0].url}
           onCropDone={handleCropDone}
+          onSkip={handleCropSkip}
           onCancel={handleCropCancel}
         />
       )}
