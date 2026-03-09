@@ -2,8 +2,15 @@ import { get, post, put, del } from './client';
 import type { Friend, FriendRequest, SearchUser, User } from '../types';
 
 export async function getFriends(): Promise<Friend[]> {
-  const res = await get<{ friends: Friend[] }>('/api/friends');
-  return res.friends;
+  const res = await get<{ friends: any[] }>('/api/friends');
+  return res.friends.map((f) => ({
+    id: f.friend?.id ?? f.id,
+    username: f.friend?.username ?? f.username,
+    avatar_url: f.friend?.avatar_url ?? f.avatar_url,
+    bio: f.friend?.bio ?? f.bio,
+    friendship_id: f.id,
+    friends_since: f.updated_at,
+  }));
 }
 
 export function sendFriendRequest(userId: number): Promise<{ friendship: { id: number } }> {
@@ -23,8 +30,17 @@ export function removeFriend(id: number): Promise<void> {
 }
 
 export async function getFriendRequests(): Promise<FriendRequest[]> {
-  const res = await get<{ requests: FriendRequest[] }>('/api/friends/requests');
-  return res.requests;
+  const res = await get<{ requests: any[] }>('/api/friends/requests');
+  return res.requests.map((r) => ({
+    id: r.id,
+    requester_id: r.requester_id,
+    addressee_id: r.addressee_id,
+    status: r.status,
+    created_at: r.created_at,
+    updated_at: r.updated_at,
+    username: r.requester?.username ?? r.username,
+    avatar_url: r.requester?.avatar_url ?? r.avatar_url,
+  }));
 }
 
 export async function searchUsers(query: string): Promise<SearchUser[]> {
